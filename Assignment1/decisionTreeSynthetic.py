@@ -56,5 +56,5 @@ def findBestSplit(dataSet, labelDistribution, attributes):
 
 
 trainingData = parser.syntheticDataSet("synthetic-1.csv", 2, 5)
-decisionTree = ID3(trainingData.data, "ROOT", [0,1], 0)
+decisionTree = ID3(trainingData.data, "ALL", [0,1], 0)
 print(RenderTree(decisionTree))
