@@ -2,6 +2,7 @@
 import syntheticDataParser as parser
 import math
 import numpy as np
+import copy
 from anytree import Node, RenderTree
 from anytree.exporter import DotExporter
 
@@ -35,7 +36,8 @@ class decisionTree:
             else:
                 target_attribute = self.findBestSplit(dataSet, labelDistribution, attributes)
                 newRoot = Node(attributes[target_attribute[0]], parent=parentNode)
-                attributes.pop(target_attribute[0])
+                newAttributes = copy.deepcopy(attributes)
+                newAttributes.pop(target_attribute[0])
                 childSets = self.findChildDataSets(dataSet,target_attribute)
                 for bin in range(1, 1 + self.numBins):
                     branch = Node("bin %s" % bin, parent=newRoot);
@@ -48,7 +50,7 @@ class decisionTree:
                         elif(labelDistribution[1] == labelDistribution[0]):
                             leaf = Node("Label = 1", parent=branch)
                     else:
-                        self.ID3(currentChildSet, target_attribute, attributes, depth+1, branch)
+                        self.ID3(currentChildSet, target_attribute, newAttributes, depth+1, branch)
 
     def determineClassLabels(self, dataSet):
         oneLabels = 0
