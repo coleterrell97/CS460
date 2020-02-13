@@ -3,6 +3,7 @@ import syntheticDataParser as parser
 import math
 import numpy as np
 from anytree import Node, RenderTree
+from anytree.exporter import DotExporter
 
 
 class decisionTree:
@@ -16,24 +17,18 @@ class decisionTree:
 
     def ID3(self, dataSet, target_attribute, attributes, depth, parentNode):
             labelDistribution = self.determineClassLabels(dataSet)
-            print(labelDistribution)
             #base cases
             if labelDistribution[0] == 0:
                 leaf = Node("Label = 1", parent=parentNode)
-                print(leaf)
             elif labelDistribution[1] == 0:
                 leaf = Node("Label = 0", parent=parentNode)
-                print(leaf)
             elif attributes == [] or depth == 3:
                 if(labelDistribution[0] > labelDistribution[1]):
                     leaf = Node("Label = 0", parent=parentNode)
-                    print(leaf)
                 elif(labelDistribution[1] > labelDistribution[0]):
                     leaf = Node("Label = 1", parent=parentNode)
-                    print(leaf)
                 elif(labelDistribution[1] == labelDistribution[0]):
                     leaf = Node("Label = 1", parent=parentNode)
-                    print(leaf)
 
             #end base cases
             #begin entropy calculation
