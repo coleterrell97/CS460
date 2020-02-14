@@ -12,16 +12,16 @@ class decisionTreeReal:
         self.numFeatures = numFeatures
         self.numBins = numBins
         self.dataFileName = dataFileName
-        self.trainingData = parser.realDataSet("Video_Games_Sales.csv", self.numFeatures, [0,0,0,0,1,1,1,1,1,0,0], self.numBins)
+        self.trainingData = parser.realDataSet("Video_Games_Sales_Subset.csv", self.numFeatures, [0,0,0,0,1,1,1,1,1,0,0], self.numBins)
         self.trainingData.discretizeFeatures()
         self.trainingData.discretizeClassLabels()
+        self.trainingData.findCategoricalValues()
         self.decisionTree = Node('TOP')
         self.ID3(self.trainingData.data, "", self.trainingData.features, 0, self.decisionTree)
         #self.createModel()
 
     def ID3(self, dataSet, target_attribute, attributes, depth, parentNode):
             labelDistribution = self.determineClassLabels(dataSet)
-            print(labelDistribution)
             labelMax = -1
             mostCommonLabel = -1
             for label in range(0,len(labelDistribution)):
@@ -55,22 +55,12 @@ class decisionTreeReal:
 
             else:
                 target_attribute = self.findBestSplit(dataSet, labelDistribution, attributes)
-                newRoot = Node(attributes[target_attribute[0]], parent=parentNode)
+                newRoot = Node(attributes[target_attribute], parent=parentNode)
                 newAttributes = copy.deepcopy(attributes)
-                newAttributes.pop(target_attribute[0])
+                newAttributes.pop(target_attribute)
                 childSets = self.findChildDataSets(dataSet,target_attribute)
-                for bin in range(1, 1 + self.numBins):
-                    branch = Node("bin %s" % bin, parent=newRoot);
-                    currentChildSet = childSets[bin-1]
-                    if(currentChildSet.shape[0] == 0):
-                        if(labelDistribution[0] > labelDistribution[1]):
-                            leaf = Node("Label = 0", parent=branch)
-                        elif(labelDistribution[1] > labelDistribution[0]):
-                            leaf = Node("Label = 1", parent=branch)
-                        elif(labelDistribution[1] == labelDistribution[0]):
-                            leaf = Node("Label = 1", parent=branch)
-                    else:
-                        self.ID3(currentChildSet, target_attribute, newAttributes, depth+1, branch)
+                print(childSets)
+
 
     def determineClassLabels(self, dataSet):
         labels = [0, 0, 0, 0, 0]
@@ -91,7 +81,8 @@ class decisionTreeReal:
     def calculateEntropy(self, dataSet, labelDistribution):
         entropy = 0
         for label in labelDistribution:
-            entropy = entropy + (-((label/dataSet.shape[0]) * math.log(label/dataSet.shape[0],2)))
+            if(label != 0):
+                entropy = entropy + (-((label/dataSet.shape[0]) * math.log(label/dataSet.shape[0],2)))
         return entropy
 
     def findBestSplit(self, dataSet, labelDistribution, attributes):
@@ -101,7 +92,7 @@ class decisionTreeReal:
             splitInfoGain[0][attribute] = self.calculateChildAverageEntropy(dataSet, attribute)
             splitInfoGain[0][attribute] = parentEntropy - splitInfoGain[0][attribute]
         bestSplit = np.where(splitInfoGain[0] == np.amax(splitInfoGain[0]))
-        return bestSplit[0]
+        return bestSplit[0][0]
 
 
     def calculateChildAverageEntropy(self, dataSet, attribute):
@@ -110,7 +101,7 @@ class decisionTreeReal:
         childSets = self.findChildDataSets(dataSet,attribute)
         for set in childSets:
             labelDistribution = self.determineClassLabels(set)
-            if labelDistribution[0] == 0 or labelDistribution[1] == 0:
+            if labelDistribution == [0,0,0,0,0]:
                 childAverageEntropy = childAverageEntropy
             else:
                 childAverageEntropy = childAverageEntropy + (set.shape[0]/totalExamples*(self.calculateEntropy(set, labelDistribution)))
@@ -118,13 +109,22 @@ class decisionTreeReal:
 
     def findChildDataSets(self, dataSet, attribute):
         childDataSets = []
-        for bin in range(1,self.numBins+1):
-            childDataSet = []
-            for dataPoint in dataSet:
-                if dataPoint[attribute] == bin:
-                    childDataSet.append(dataPoint)
-            childDataSet = np.array(childDataSet, float)
-            childDataSets.append(childDataSet)
+        if self.trainingData.dataTypes[attribute] == 1: #feature is numerical
+            for bin in range(1,self.numBins+1):
+                childDataSet = []
+                for dataPoint in dataSet:
+                    if int(dataPoint[attribute]) == bin:
+                        childDataSet.append(dataPoint)
+                childDataSet = np.array(childDataSet)
+                childDataSets.append(childDataSet)
+        elif self.trainingData.dataTypes[attribute] == 0: #feature is categorical
+            for value in self.trainingData.categoricalValues[attribute]:
+                childDataSet = []
+                for dataPoint in dataSet:
+                    if dataPoint[attribute] == value:
+                        childDataSet.append(dataPoint)
+                childDataSet = np.array(childDataSet)
+                childDataSets.append(childDataSet)
         return childDataSets
 
     def printTree(self):

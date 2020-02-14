@@ -11,6 +11,7 @@ class realDataSet:
         self.dataSource = "./data/" + fileName
         self.features = []
         self.binSize = []
+        self.categoricalValues = []
         self.__readCSVFile__()
     #end function __init__
 
@@ -77,6 +78,15 @@ class realDataSet:
                 dataPoint[11] = 4
             elif float(dataPoint[11]) > 80 and float(dataPoint[11]) < 100:
                 dataPoint[11] = 5
+
+    def findCategoricalValues(self):
+        for feature in range(0, self.numFeatures):
+            possibleValues = []
+            if(self.dataTypes[feature] == 0):
+                for dataPoint in self.data:
+                    if dataPoint[feature] not in possibleValues:
+                        possibleValues.append(dataPoint[feature])
+            self.categoricalValues.append(possibleValues)
 
     def printData(self):
         for dataPoint in self.data:
