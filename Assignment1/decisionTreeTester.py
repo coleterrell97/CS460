@@ -3,35 +3,19 @@
 
 import decisionTreeSynthetic
 import syntheticDataParser as parser
+import matplotlib.pyplot as plt
 from anytree import Node, RenderTree, Resolver
+import numpy as np
 
-testData = parser.syntheticDataSet("synthetic-4.csv", 2, 10) #4, 10, 10, 10 [number of bins]
-myTree = decisionTreeSynthetic.decisionTree(2, 10, "synthetic-4.csv") #4, 10, 10, 10
+testData = parser.syntheticDataSet("synthetic-1.csv", 2, 5)
+testData.discretizeFeatures()
+myTree = decisionTreeSynthetic.decisionTree(2, 5, "synthetic-1.csv")
 
 correct = 0
 total = testData.data.shape[0]
-print(testData.data)
 for dataPoint in testData.data:
-    r = Resolver()
-    query = "Feature1/bin " + str(int(dataPoint[0])) + "/Feature2/bin " + str(int(dataPoint[1])) + "/*"
-    try:
-        prediction = r.glob(myTree.decisionTree, query)[0].name
-    except:
-        try:
-            query = "Feature2/bin " + str(int(dataPoint[1])) + "/Feature1/bin " + str(int(dataPoint[0])) + "/*"
-            prediction = r.glob(myTree.decisionTree, query)[0].name
-        except:
-            try:
-                query = "Feature2/bin " + str(int(dataPoint[1])) + "/*"
-                prediction = r.glob(myTree.decisionTree, query)[0].name
-            except:
-                query = "Feature1/bin " + str(int(dataPoint[0])) + "/*"
-                prediction = r.glob(myTree.decisionTree, query)[0].name
-
-    print(query)
-    actual = "Label = " + str(int(dataPoint[2]))
-    print(prediction, actual)
-    if actual == prediction:
+    if dataPoint[2] == myTree.decisionTreeModel[int(dataPoint[0])-1][int(dataPoint[1])-1]:
         correct = correct + 1
+print("Accuracy: ")
 print(float(correct/total))
 myTree.printTree()

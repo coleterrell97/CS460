@@ -13,7 +13,6 @@ class syntheticDataSet:
         self.numBins = numBins
         self.dataSource = "./data/" + fileName
         self.__readCSVFile__()
-        self.__discretizeFeatures__()
     #end function __init__
 
 
@@ -32,7 +31,7 @@ class syntheticDataSet:
         print(self.data)
     #end function printData
 
-    def __discretizeFeatures__(self):
+    def discretizeFeatures(self):
         max = np.amax(self.data, axis = 0)
         min = np.amin(self.data, axis = 0)
         for feature in range(0,self.numFeatures):

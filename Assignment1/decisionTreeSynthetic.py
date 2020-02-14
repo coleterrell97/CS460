@@ -3,7 +3,7 @@ import syntheticDataParser as parser
 import math
 import numpy as np
 import copy
-from anytree import Node, RenderTree
+from anytree import Node, RenderTree, Resolver
 from anytree.exporter import DotExporter
 
 
@@ -13,8 +13,10 @@ class decisionTree:
         self.numBins = numBins
         self.dataFileName = dataFileName
         self.trainingData = parser.syntheticDataSet(self.dataFileName, self.numFeatures, self.numBins)
+        self.trainingData.discretizeFeatures()
         self.decisionTree = Node('TOP')
         self.ID3(self.trainingData.data, "", ["Feature1", "Feature2"], 0, self.decisionTree)
+        self.createModel()
 
     def ID3(self, dataSet, target_attribute, attributes, depth, parentNode):
             labelDistribution = self.determineClassLabels(dataSet)
@@ -107,3 +109,28 @@ class decisionTree:
     def printTree(self):
         for pre, fill, node in RenderTree(self.decisionTree):
             print("%s%s" % (pre, node.name))
+
+    def createModel(self):
+        self.decisionTreeModel = np.empty([self.numBins, self.numBins])
+        for i in range(0, self.numBins):
+            for j in range(0, self.numBins):
+                r = Resolver()
+                query = "Feature1/bin " + str(i+1) + "/Feature2/bin " + str(j+1) + "/*"
+                try:
+                    prediction = r.glob(self.decisionTree, query)[0].name
+                except:
+                    try:
+                        query = "Feature2/bin " + str(j+1) + "/Feature1/bin " + str(i+1) + "/*"
+                        prediction = r.glob(self.decisionTree, query)[0].name
+                    except:
+                        try:
+                            query = "Feature2/bin " + str(j+1) + "/*"
+                            prediction = r.glob(self.decisionTree, query)[0].name
+                        except:
+                            query = "Feature1/bin " + str(i+1) + "/*"
+                            prediction = r.glob(self.decisionTree, query)[0].name
+                if(prediction == "Label = 1"):
+                    prediction = 1
+                elif(prediction == "Label = 0"):
+                    prediction = 0
+                self.decisionTreeModel[i][j] = prediction
