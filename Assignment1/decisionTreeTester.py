@@ -5,11 +5,12 @@ import decisionTreeSynthetic
 import syntheticDataParser as parser
 from anytree import Node, RenderTree, Resolver
 
-testData = parser.syntheticDataSet("synthetic-4.csv", 2, 5)
-myTree = decisionTreeSynthetic.decisionTree(2, 5, "synthetic-4.csv")
+testData = parser.syntheticDataSet("synthetic-4.csv", 2, 10) #4, 10, 10, 10 [number of bins]
+myTree = decisionTreeSynthetic.decisionTree(2, 10, "synthetic-4.csv") #4, 10, 10, 10
 
 correct = 0
 total = testData.data.shape[0]
+print(testData.data)
 for dataPoint in testData.data:
     r = Resolver()
     query = "Feature1/bin " + str(int(dataPoint[0])) + "/Feature2/bin " + str(int(dataPoint[1])) + "/*"

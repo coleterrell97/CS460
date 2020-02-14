@@ -36,14 +36,14 @@ class syntheticDataSet:
         max = np.amax(self.data, axis = 0)
         min = np.amin(self.data, axis = 0)
         for feature in range(0,self.numFeatures):
-            featureRange= max[feature]-min[feature]
+            featureRange = max[feature]-min[feature]
             binSize = featureRange/self.numBins
             #round continuous data to a range of values between 1 and 5
             for dataPoint in self.data:
                 binNumber = 1
                 while dataPoint[feature] > min[feature]:
                     dataPoint[feature] = dataPoint[feature] - binSize
-                    if(dataPoint[feature] > min[feature]):
+                    if(dataPoint[feature] > min[feature] and binNumber < self.numBins):
                         binNumber = binNumber + 1
                 dataPoint[feature] = binNumber
     #end function __discretizeFeatures__
