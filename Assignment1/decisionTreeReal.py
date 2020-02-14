@@ -30,26 +30,26 @@ class decisionTreeReal:
                     mostCommonLabel = label
             #base cases
             if labelDistribution[0] == dataSet.shape[0]:
-                leaf = Node("Between 0-20", parent=parentNode)
+                leaf = Node("Label = 1", parent=parentNode)
             elif labelDistribution[1] == dataSet.shape[0]:
-                leaf = Node("Between 20-40", parent=parentNode)
+                leaf = Node("Label = 2", parent=parentNode)
             elif labelDistribution[2] == dataSet.shape[0]:
-                leaf = Node("Between 40-60", parent=parentNode)
+                leaf = Node("Label = 3", parent=parentNode)
             elif labelDistribution[3] == dataSet.shape[0]:
-                leaf = Node("Between 60-80", parent=parentNode)
+                leaf = Node("Label = 4", parent=parentNode)
             elif labelDistribution[4] == dataSet.shape[0]:
-                leaf = Node("Between 80-100", parent=parentNode)
+                leaf = Node("Label = 5", parent=parentNode)
             elif attributes == [] or depth == 3:
                 if mostCommonLabel == 0:
-                    leaf = Node("Between 0-20", parent=parentNode)
+                    leaf = Node("Label = 1", parent=parentNode)
                 elif mostCommonLabel == 1:
-                    leaf = Node("Between 20-40", parent=parentNode)
+                    leaf = Node("Label = 2", parent=parentNode)
                 elif mostCommonLabel == 2:
-                    leaf = Node("Between 40-60", parent=parentNode)
+                    leaf = Node("Label = 3", parent=parentNode)
                 elif mostCommonLabel == 3:
-                    leaf = Node("Between 60-80", parent=parentNode)
+                    leaf = Node("Label = 4", parent=parentNode)
                 elif mostCommonLabel == 4:
-                    leaf = Node("Between 80-100", parent=parentNode)
+                    leaf = Node("Label = 5", parent=parentNode)
             #end base cases
             #begin entropy calculation
 
@@ -59,7 +59,23 @@ class decisionTreeReal:
                 newAttributes = copy.deepcopy(attributes)
                 newAttributes.pop(target_attribute)
                 childSets = self.findChildDataSets(dataSet,target_attribute)
-                print(childSets)
+                majorityPick = mostCommonLabel + 1
+                if self.trainingData.dataTypes[target_attribute] == 1:
+                    for bin in range(1, 1 + self.numBins):
+                        branch = Node("bin %s" % bin, parent=newRoot);
+                        currentChildSet = childSets[bin-1]
+                        if(currentChildSet.shape[0] == 0):
+                            leaf = Node("Label = %s" % majorityPick, parent=branch)
+                        else:
+                            self.ID3(currentChildSet, target_attribute, newAttributes, depth+1, branch)
+                elif self.trainingData.dataTypes[target_attribute] == 0:
+                    for value in range(0, len(self.trainingData.categoricalValues[target_attribute])):
+                        branch = Node(self.trainingData.categoricalValues[target_attribute][value], parent = newRoot)
+                        currentChildSet = childSets[value]
+                        if(currentChildSet.shape[0] == 0):
+                            leaf = Node("Label = %s" % majorityPick, parent=branch)
+                        else:
+                            self.ID3(currentChildSet, target_attribute, newAttributes, depth+1, branch)
 
 
     def determineClassLabels(self, dataSet):
